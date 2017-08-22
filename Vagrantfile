@@ -18,7 +18,7 @@ Vagrant.require_version ">= 1.7.4"
 # end
 
 # The number of nodes to provision
-$num_node = (ENV['NUM_NODES'] || 10).to_i
+$num_node = (ENV['NUM_NODES'] || 5).to_i
 
 # ip configuration
 $master_ip = ENV['MASTER_IP'] || "192.168.56.10"
@@ -48,12 +48,12 @@ $use_rsync = ENV['KUBERNETES_VAGRANT_USE_RSYNC'] == 'true'
 $kube_provider_boxes = {
   :virtualbox => {
     'ubuntu' => {
-      :box_name => 'ubuntu/xenial64',
+      :box_name => 'kubernetes',
     }
   },
   :libvirt => {
     'ubuntu' => {
-      :box_name => 'ubuntu/xenial64',
+      :box_name => 'kubernetes',
     }
   },
 }
@@ -86,6 +86,7 @@ $vm_master_mem = (ENV['KUBERNETES_MASTER_MEMORY'] || ENV['KUBERNETES_MEMORY'] ||
 $vm_node_mem = (ENV['KUBERNETES_NODE_MEMORY'] || ENV['KUBERNETES_MEMORY'] || 1024).to_i
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  
   if Vagrant.has_plugin?("vagrant-proxyconf")
     $http_proxy = ENV['KUBERNETES_HTTP_PROXY'] || ""
     $https_proxy = ENV['KUBERNETES_HTTPS_PROXY'] || ""
@@ -100,6 +101,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.ssh.insert_key = false
   end
 
+  # ssh settings
+  #config.ssh.username = "ubuntu"
+  #config.ssh.password = "bc87f4d84e446c1d1539fe2c"
+  
+  config.ssh.insert_key = false
+  config.ssh.private_key_path = ["keys/private_key", "~/.vagrant.d/insecure_private_key"]
+  config.vm.provision "file", source: "keys/public_key", destination: "~/.ssh/authorized_keys"
+  config.vm.provision "shell", inline: <<-EOC
+    sudo sed -i -e "\\#PasswordAuthentication yes# s#PasswordAuthentication yes#PasswordAuthentication no#g" /etc/ssh/sshd_config
+    sudo service ssh restart
+  EOC
+  
   def setvmboxandurl(config, provider)
     if ENV['KUBERNETES_BOX_NAME'] then
       config.vm.box = ENV['KUBERNETES_BOX_NAME']
