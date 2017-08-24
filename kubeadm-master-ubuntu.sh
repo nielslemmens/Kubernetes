@@ -45,10 +45,17 @@ sudo cp /etc/kubernetes/admin.conf /vagrant/
 sudo kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
 #run the standard pods that we always need
+sudo kubectl apply -f /vagrant/kubernetes/yamls/namespace-production.yaml
 sudo kubectl apply -f /vagrant/kubernetes/yamls/kubernetes-default-http-backend.yaml
 sudo kubectl apply -f /vagrant/kubernetes/yamls/kubernetes-ingress-rbac.yaml
 sudo kubectl apply -f /vagrant/kubernetes/yamls/kubernetes-ingress.yaml
+sudo kubectl apply -f /vagrant/kubernetes/influxdb
+sudo kubectl apply -f /vagrant/kubernetes/rbac/heapster-rbac.yaml
 sudo kubectl apply -f /vagrant/kubernetes/yamls/mysql_service.yaml
+sudo kubectl apply -f /vagrant/petclinic.yaml
+
+#Ping the jenkins hosts to resolve any ARP cache issues
+ping -c 4 192.168.56.2
 
 # Add storage on master and export via NFS
 apt-get install nfs-kernel-server -y
