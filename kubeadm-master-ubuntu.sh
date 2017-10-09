@@ -2,7 +2,7 @@
 
 #this has been added into the vagrant box kubernetes
 #sudo apt-get update
-#sudo apt-get upgrade && sudo apt-get dist-upgrade
+#sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y
 #sudo apt-get install apt-transport-https ca-certificates -y
 #sudo apt-get install curl \
 #    linux-image-extra-$(uname -r) \
